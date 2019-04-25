@@ -1,0 +1,71 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Security and Network federated IAM roles and policies'
+
+Parameters:
+  CompanyCode:
+    Description: 'Short Company code'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - abc
+  principalOrgID:
+    Description: 'Organization ID'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - o-yyyyyyyyyy
+Resources:
+  PolicyIAMAdmin:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: IAMAdmin-Policy
+      Path: /${CompanyCode}/security/
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: Stmt1495058250000
+            Effect: Allow
+            Action:
+              - 'iam:*'            
+              - 'acm:*'
+              - 'athena:*'
+              - 'cloudformation:*'
+              - 'config:*'
+              - 'kms:*'
+              - 'route53:*'
+              - 'route53:domain*'
+              - 's3:*'
+              - 'sns:*'
+              - 'support:*'
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Resource: arn:aws:iam::*:role/${CompanyCode}/security/IAMAdminRole
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: ${principalOrgID}
+  RoleIAMAdmin:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRoleWithSAML'
+            Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:saml-provider/ADFS"
+            Condition:
+              StringEquals:
+                'SAML:aud': 'https://signin.aws.amazon.com/saml'
+      RoleName: IAMAdminRole
+      Path: /${CompanyCode}/security/
+      ManagedPolicyArns:
+        - !Ref PolicyIAMAdmin
+        - arn:aws:iam::${AWS::AccountId}:role/${CompanyCode}/security/PolicyDenyNotApprovedRegions
+        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSConfigRole
+        - arn:aws:iam::aws:policy/AWSCloudTrailFullAccess
+        - arn:aws:iam::aws:policy/AWSCloud9EnvironmentMember
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess

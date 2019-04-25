@@ -9,12 +9,6 @@ Parameters:
     Default: ???
     AllowedValues:
     - abc
-  principalOrgID:
-    Description: 'Organization ID'
-    Type: String
-    Default: ???
-    AllowedValues:
-    - o-yyyyyyyyyy
 Resources:
   PolicyIAMAdmin:
     Type: 'AWS::IAM::ManagedPolicy'
@@ -39,13 +33,6 @@ Resources:
               - 'sns:*'
               - 'support:*'
             Resource: '*'
-          - Effect: Allow
-            Action:
-              - sts:AssumeRole
-            Resource: arn:aws:iam::*:role/${CompanyCode}/security/IAMAdminRole
-            Condition:
-              StringEquals:
-                aws:PrincipalOrgID: ${principalOrgID}
   RoleIAMAdmin:
     Type: 'AWS::IAM::Role'
     Properties:

@@ -8,15 +8,13 @@ Parameters:
     Type: String
     Default: ???
     AllowedValues:
-    - ???
-    - ???
+    - abc
   principalOrgID:
     Description: 'Organization ID'
     Type: String
     Default: ???
     AllowedValues:
-    - ???
-    - ???
+    - o-yyyyyyyyyy    
 Resources:
   PolicyDenyNotApprovedRegions:
     Type: 'AWS::IAM::ManagedPolicy'

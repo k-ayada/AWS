@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Security and Network federated IAM roles and policies'
+Description: 'Federated IAM Admin Role'
 
 Parameters:
   CompanyCode:

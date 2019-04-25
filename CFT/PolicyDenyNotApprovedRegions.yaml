@@ -11,7 +11,7 @@ Parameters:
     - ???
     - ???
   principalOrgID:
-    Description: 'Short Company code'
+    Description: 'Organization ID'
     Type: String
     Default: ???
     AllowedValues:

@@ -1,0 +1,149 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Federated Security roles and policies'
+
+Parameters:
+  CompanyCode:
+    Description: 'Short Company code'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - abc
+
+Resources:
+  PolicySecurityEngineer:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: SecurityEngineer-Policy
+      Path: /${CompanyCode}/security/
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+            - 'acm:DescribeCertificate'
+            - 'acm:GetCertificate'
+            - 'acm:ListCertificates'
+            - 'acm:ListTagsForCertificate'
+            - 'apigateway:*'
+            - 'application-autoscaling:Describe*'
+            - 'autoscaling:*'
+            - 'autoscaling:Describe*'
+            - 'autoscaling:Describe*'
+            - 'aws-marketplace:*'
+            - 'CloudDirectory:*'
+            - 'Cloudformation:*'
+            - 'cloudformation:CreateStack'
+            - 'cloudformation:DeleteStack'
+            - 'cloudformation:DescribeStack*'
+            - 'cloudformation:UpdateStack'
+            - 'cloudfront:*'
+            - 'CloudSearch:*'
+            - 'CloudTrail:*'
+            - 'cloudtrail:Describe*'
+            - 'cloudwatch:*'
+            - 'cloudwatch:Describe*'
+            - 'cloudwatch:Get*'
+            - 'cloudwatch:GetMetricStatistics'
+            - 'cloudwatch:List*'
+            - 'codedeploy:*'
+            - 'config:*'
+            - 'config:DescribeConfigurationRecorders'
+            - 'directconnect:*'
+            - 'ds:*'
+            - 'ec2:*'
+            - 'ec2:*vpc*'
+            - 'ec2:Describe*'
+            - 'ec2:Describe*'
+            - 'ec2:runinstances'
+            - 'ecs:*'
+            - 'elasticbeanstalk:Describe*'
+            - 'elasticbeanstalk:List*'
+            - 'elasticbeanstalk:RequestEnvironmentInfo'
+            - 'elasticbeanstalk:RetrieveEnvironmentInfo'
+            - 'elasticloadbalancing:*'
+            - 'elasticloadbalancing:*'
+            - 'elasticloadbalancing:*'
+            - 'elasticloadbalancing:Describe*'
+            - 'es:*'
+            - 'events:*'
+            - 'events:DeleteRule'
+            - 'events:DescribeRule'
+            - 'events:ListRuleNamesByTarget'
+            - 'events:ListTargetsByRule'
+            - 'events:PutRule'
+            - 'events:PutTargets'
+            - 'events:RemoveTargets'
+            - 'iam:AddRoleToInstanceProfile'
+            - 'iam:AttachRolePolicy'
+            - 'iam:CreateInstanceProfile'
+            - 'iam:CreatePolicyVersion'
+            - 'iam:CreateRole'
+            - 'iam:DeleteInstanceProfile'
+            - 'iam:DeletePolicy'
+            - 'iam:DeletePolicyVersion'
+            - 'iam:DeleteRole'
+            - 'iam:DeleteRolePolicy'
+            - 'iam:DetachRolePolicy'
+            - 'iam:GenerateCredentialReport'
+            - 'iam:GenerateServiceLastAccessedDetails'
+            - 'iam:Get*'
+            - 'iam:GetRole'
+            - 'iam:List*'
+            - 'iam:passrole'
+            - 'iam:PutRolePolicy'
+            - 'iam:RemoveRoleFromInstanceProfile'
+            - 'iam:SimulateCustomPolicy'
+            - 'iam:SimulatePrincipalPolicy'
+            - 'inspector:*'
+            - 'Lambda:*'
+            - 'lambda:*'
+            - 'logs:*'
+            - 'logs:Describe*'
+            - 'logs:DescribeLogGroups'
+            - 'logs:DescribeLogStreams'
+            - 'logs:Get*'
+            - 'logs:GetLogEvents'
+            - 'logs:TestMetricFilter'
+            - 'rds:*'
+            - 'rds:Describe*'
+            - 'route53:*'
+            - 'route53domains:*'
+            - 's3:*'
+            - 's3:Describe*'
+            - 'servicecatalog:*'
+            - 'sns:*'
+            - 'sns:Get*'
+            - 'sns:List*'
+            - 'sns:ListSubscriptionsbyTopic'
+            - 'sns:ListTopics'
+            - 'sqs:*'
+            - 'ssm:*'
+            - 'support:*'
+            - 'waf-regional:*'
+            - 'waf:*'           
+            Resource: '*'
+  RoleSecurityEngineer:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRoleWithSAML'
+            Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:saml-provider/ADFS"
+            Condition:
+              StringEquals:
+                'SAML:aud': 'https://signin.aws.amazon.com/saml'
+      RoleName: SecurityEngineer
+      Path: /${CompanyCode}/security/
+      ManagedPolicyArns:
+        - !Ref PolicySecurityEngineer
+        - arn:aws:iam::${AWS::AccountId}:role/${CompanyCode}/security/PolicyDenyNotApprovedRegions
+        - arn:aws:iam::aws:policy/SecurityAudit
+        - arn:aws:iam::aws:policy/IAMUserSSHKeys
+        - arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser
+        - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess
+        - arn:aws:iam::aws:policy/AWSCloud9User

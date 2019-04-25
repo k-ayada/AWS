@@ -1,0 +1,77 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Federated Role for Network Engineer and policies'
+
+Parameters:
+  CompanyCode:
+    Description: 'Short Company code'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - abc
+
+Resources:
+  PolicyNetworkEngineer:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: NetworkEngineer-Policy
+      Path: /${CompanyCode}/security/
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'DirectConnect:*'
+              - 'support:*'
+              - 's3:Describe*'
+              - 's3:list*'
+              - 's3:get*'
+              - 's3:put*'
+              - 's3:createbucket*'
+              - 'cloudtrail:Describe*'
+              - 'rds:Describe*'
+              - 'elasticloadbalancing:Describe*'
+              - 'config:DescribeConfigurationRecorders'
+              - 'cloudformation:*'
+              - 'logs:Get*'
+              - 'logs:Describe*'
+              - 'logs:TestMetricFilter'
+              - 'sns:Get*'
+              - 'sns:List*'
+              - 'application-autoscaling:Describe*'
+              - 'ec2:*vpc*'
+              - 'ec2:*Subnet*'
+              - 'ec2:*Gateway*'
+              - 'ec2:*Vpn*'
+              - 'ec2:*Route*'
+              - 'ec2:*Address*'
+              - 'ec2:*NetworkAcl*'
+              - 'ec2:*DhcpOptions*'
+              - 'ec2:DescribeAccountAttributes'
+              - 'SNS:*'
+              - 'Cloudwatch:*'
+            Resource: '*'
+  RoleNetworkEngineer:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRoleWithSAML'
+            Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:saml-provider/ADFS"
+            Condition:
+              StringEquals:
+                'SAML:aud': 'https://signin.aws.amazon.com/saml'
+      RoleName: NetworkEngineer
+      Path: /${CompanyCode}/security/
+      ManagedPolicyArns:
+        - !Ref PolicyNetworkEngineer
+        - !Ref PolicyDenyNotApprovedRegionsForNetwork
+        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+        - arn:aws:iam::aws:policy/job-function/NetworkAdministrator
+
+ 
+   
+ 

@@ -1,0 +1,37 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Customer Managed Policy to deny create users outside a list of regions'
+
+Parameters:
+  CompanyCode:
+    Description: 'Short Company code'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - ???
+    - ???
+  principalOrgID:
+    Description: 'Short Company code'
+    Type: String
+    Default: ???
+    AllowedValues:
+    - ???
+    - ???
+Resources:
+  PolicyDenyNotApprovedRegions:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: SecDenyNotApprovedRegions-Policy
+      Path: /${CompanyCode}/security/
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: DenyNotApprovedRegions
+          Action: '*'
+          Resource: '*'
+          Effect: Deny
+          Condition:
+            StringNotEquals:
+              'aws:RequestedRegion':
+                - us-west-2
+                - us-east-1

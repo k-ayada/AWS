@@ -1,0 +1,74 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Creates the base S3 buckets and KMS Keys for the Datalake  
+
+  (c) 2019 Amazon Web Services, Inc. or its affiliates. All Rights Reserved. 
+  This AWS Content is provided subject to the terms of the AWS Customer 
+  Agreement available at http://aws.amazon.com/agreement or other written 
+  agreement between Customer and Amazon Web Services, Inc.
+  
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+    - dev
+    - qa
+    - uat
+    - prod    
+  RSClusterID:
+    Type: String
+    Description: Name you want give for the Redshift Cluster
+    
+Resources:
+  KMSAlisRedShift:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${Environment}-redshift-${AWS::Region}
+      TargetKeyId: !Ref KMSKeyRedshift
+
+  KMSKeyRedshift:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub This key is used for the ${Environment} Redshift cluster in ${AWS::Region}
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Sub ${Environment}-${RSClusterID}-${AWS::Region}
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:role/DatalakeProd-FullStackTeam
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: '*'
+          - Sid: Allow use of the key
+            Effect: Allow
+            Principal:
+              AWS: 
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/admin/${Environment}-DBARole
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/app/${Environment}-EMREc2Role
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: '*'
